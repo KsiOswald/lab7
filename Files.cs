@@ -1,83 +1,13 @@
 ﻿using System.Xml.Serialization;
-
-[Serializable]
-public struct BaggageItem
-{
-    private string name;
-    private double weight;
-
-    public string Name
-    {
-        get
-        {
-            return name;
-        }
-        set
-        {
-            name = value;
-        }
-    }
-
-    public double Weight
-    {
-        get
-        {
-            return weight;
-        }
-        set
-        {
-            weight = value;
-        }
-    }
-
-    public BaggageItem(string name, double weight)
-    {
-        this.name = name;
-        this.weight = weight;
-    }
-}
-
-[Serializable]
-public struct Passenger
-{
-    private string lastName;
-    private BaggageItem[] items;
-
-    public string LastName
-    {
-        get
-        {
-            return lastName;
-        }
-        set
-        {
-            lastName = value;
-        }
-    }
-
-    public BaggageItem[] Items
-    {
-        get
-        {
-            return items;
-        }
-        set
-        {
-            items = value;
-        }
-    }
-
-    public Passenger(string lastName, BaggageItem[] items)
-    {
-        this.lastName = lastName;
-        this.items = items;
-    }
-}
 internal class Files
 {
-    
     public static void CreateRandomIntFile(string path)
     {
+        if (!File.Exists(path))
+        {
+            Console.WriteLine("Файл не найден!");
+            return;
+        }
         var rand = new Random();
         int sizeOfFile = rand.Next(1, 12345) * 2;
         StreamWriter writer = new StreamWriter(path, false);
@@ -89,6 +19,11 @@ internal class Files
     }
     public static int LengthOfFile(string path)
     {
+        if (!File.Exists(path))
+        {
+            Console.WriteLine("Файл не найден!");
+            return 0;
+        }
         int length = 0;
         StreamReader reader = new StreamReader(path);
         while (reader.ReadLine() != null)
@@ -101,6 +36,11 @@ internal class Files
 
     public static int DiffOfHalves(string path, int length)
     {
+        if (!File.Exists(path))
+        {
+            Console.WriteLine("Файл не найден!");
+            return 0;
+        }
         int sumOfFirstHalf = 0;
         int sumOfSecondHalf = 0;
         StreamReader reader = new StreamReader(path);
@@ -122,6 +62,11 @@ internal class Files
 
     public static void CreateFileLotIntNumbers(string path)
     {
+        if (!File.Exists(path))
+        {
+            Console.WriteLine("Файл не найден!");
+            return;
+        }
         var rand = new Random();
         int sizeOfFile = rand.Next(1, 1234);
         StreamWriter writer = new StreamWriter(path, false);
@@ -141,6 +86,11 @@ internal class Files
 
     public static int SumOfFile(string path)
     {
+        if (!File.Exists(path))
+        {
+            Console.WriteLine("Файл не найден!");
+            return 0;
+        }
         int sum = 0;
         string newNumber;
         char newChar;
@@ -148,7 +98,7 @@ internal class Files
         while (reader.Peek() != -1)
         {
             newNumber = "";
-            while (((char)reader.Peek() != ' ') && 
+            while (((char)reader.Peek() != ' ') &&
                 ((char)reader.Peek() != '\r'))
             {
                 newChar = (char)reader.Read();
@@ -159,10 +109,13 @@ internal class Files
                 sum += int.Parse(newNumber);
                 reader.Read();
             }
-            else if (reader.Peek() == '\r')
+            else
             {
-                reader.Read();
-                reader.Read();
+                if (reader.Peek() == '\r')
+                {
+                    reader.Read();
+                    reader.Read();
+                }
             }
         }
         reader.Close();
@@ -170,8 +123,13 @@ internal class Files
     }
     public static string FindMinStr(string path)
     {
-        string? newStr;
-        string? minStr;
+        if (!File.Exists(path))
+        {
+            Console.WriteLine("Файл не найден!");
+            return null;
+        }
+        string newStr;
+        string minStr;
         StreamReader reader = new StreamReader(path);
         newStr = reader.ReadLine();
         minStr = newStr;
@@ -189,8 +147,13 @@ internal class Files
 
     public static string FindMaxStr(string path)
     {
-        string? newStr;
-        string? maxStr;
+        if (!File.Exists(path))
+        {
+            Console.WriteLine("Файл не найден!");
+            return null;
+        }
+        string newStr;
+        string maxStr;
         StreamReader reader = new StreamReader(path);
         newStr = reader.ReadLine();
         maxStr = newStr;
@@ -216,8 +179,9 @@ internal class Files
     public static void FillBinaryFile(string path)
     {
         Random rand = new Random();
-        int count = rand.Next(1,1001);
-        BinaryWriter writer = new BinaryWriter(File.Open(path, FileMode.Create));
+        int count = rand.Next(1, 50);
+        BinaryWriter writer =
+            new BinaryWriter(File.Open(path, FileMode.Create));
         {
             for (int i = 0; i < count; i++)
             {
@@ -226,39 +190,56 @@ internal class Files
         }
         writer.Close();
     }
-    public static int GetSumOfEvenNumbers(string path)
+    public static void FillNewBinaryFile(string path)
     {
-        int sum = 0;
-        BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open));
+        if (!File.Exists(path))
+        {
+            Console.WriteLine("Файл невозможно открыть!");
+            return;
+        }
+        BinaryReader reader =
+            new BinaryReader(File.Open(path, FileMode.Open));
+        string newPath = "new7.4.dat";
+        BinaryWriter writer =
+            new BinaryWriter(File.Open(newPath, FileMode.Create));
         while (reader.BaseStream.Position < reader.BaseStream.Length)
         {
             int number = reader.ReadInt32();
             if (number % 2 == 0)
             {
-                sum += number;
+                writer.Write(number);
             }
         }
         reader.Close();
-        return sum;
+        writer.Close();
+        Console.WriteLine("Исходный файл: ");
+        PrintBinFile(path);
+        Console.WriteLine("Новый файл: ");
+        PrintBinFile(newPath);
     }
-    public static void FillBaggageFile(string path)
+
+    public static void PrintBinFile(string filePath)
     {
-        Passenger[] passengers = new Passenger[3];
-
-        BaggageItem[] items1 = new BaggageItem[2];
-        items1[0] = new BaggageItem("Чемодан", 18.0);
-        items1[1] = new BaggageItem("Сумка", 4.0);
-        passengers[0] = new Passenger("Иванов", items1);
-
-        BaggageItem[] items2 = new BaggageItem[1];
-        items2[0] = new BaggageItem("Коробка", 12.0);
-        passengers[1] = new Passenger("Петров", items2);
-
-        BaggageItem[] items3 = new BaggageItem[2];
-        items3[0] = new BaggageItem("Рюкзак", 6.0);
-        items3[1] = new BaggageItem("Пакет", 2.0);
-        passengers[2] = new Passenger("Сидоров", items3);
-
+        if (!File.Exists(filePath))
+        {
+            Console.WriteLine("Файл не найден!");
+            return;
+        }
+        int num = 0;
+        BinaryReader reader =
+            new BinaryReader(File.Open(filePath, FileMode.Open));
+        {
+            while (reader.BaseStream.Position < reader.BaseStream.Length)
+            {
+                num = reader.ReadInt32();
+                Console.Write(num + " ");
+            }
+            Console.WriteLine();
+        }
+        reader.Close();
+    }
+    public static void FillBaggageFile(string path, Passenger[] passengers)
+    {
         XmlSerializer serializer = new XmlSerializer(typeof(Passenger[]));
         FileStream fs = new FileStream(path, FileMode.Create);
         serializer.Serialize(fs, passengers);
@@ -267,12 +248,15 @@ internal class Files
 
     public static void FindBaggage(string path, double m)
     {
+        if (!File.Exists(path))
+        {
+            Console.WriteLine("Файл не найден!");
+            return;
+        }
         XmlSerializer serializer = new XmlSerializer(typeof(Passenger[]));
         Passenger[] passengers;
         FileStream file = new FileStream(path, FileMode.Open);
-        {
-            passengers = (Passenger[])serializer.Deserialize(file);
-        }
+        passengers = (Passenger[])serializer.Deserialize(file);
         file.Close();
 
         double totalWeight = 0;

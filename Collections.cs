@@ -1,9 +1,8 @@
-﻿using System.Reflection.PortableExecutable;
-
-internal class Collections
+﻿internal class Collections
 {
     public static void FillStringListFromConsole(List<string> list)
     {
+
         Console.Write("Введите количество строк в списке: ");
         int count;
         while (!int.TryParse(Console.ReadLine(), out count) || count < 0)
@@ -25,14 +24,16 @@ internal class Collections
             list.Add(input);
         }
     }
-    public static void RemoveAllElements(List<string> list,
-        string itemToRemove)
+    public static void RemoveAllElements<T>(List<T> list, T itemToRemove)
     {
-        if (list == null) return;
+        if (list == null)
+        {
+            return;
+        }
         int i = 0;
         while (i < list.Count)
         {
-            if (list[i] == itemToRemove)
+            if (list[i].Equals(itemToRemove))
             {
                 list.RemoveAt(i);
             }
@@ -44,65 +45,65 @@ internal class Collections
     }
     public static void FillLinkedListFromConsole(LinkedList<string> list)
     {
-        Console.Write("Введите количество строк в списке: ");
-        int count;
-        while (!int.TryParse(Console.ReadLine(), out count) || count < 0)
+        Console.Write("Введите количество элементов: ");
+        if (!int.TryParse(Console.ReadLine(), out int n))
         {
-            Console.Write("Ошибка! Введите целое положительное число: ");
+            return;
         }
-
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < n; i++)
         {
-            Console.Write($"Введите строку {i}: ");
+            Console.Write($"Введите элемент {i + 1}: ");
             string? input = Console.ReadLine();
-            while (input == null)
-            {
-                Console.Write("Ошибка ввода! Попробуйте еще раз" +
-                    $" для строки {i}: ");
-                input = Console.ReadLine();
-            }
-
             list.AddLast(input);
         }
     }
-    public static void PrintInReverse(LinkedListNode<string>? node)
+    public static void PrintInReverse<T>(LinkedListNode<T> node)
     {
         if (node == null)
         {
             return;
         }
         PrintInReverse(node.Next);
-        Console.WriteLine(node.Value);
+        Console.Write(node.Value + " ");
     }
-    public static void AnalyzePurchases(List<HashSet<string>> schoolsPurchases,
-        HashSet<string> allFirms)
-    {
 
+    public static HashSet<string> CommonFirms(List<HashSet<string>> schoolsPurchases)
+    {
         HashSet<string> commonFirms = new HashSet<string>(schoolsPurchases[0]);
         for (int i = 1; i < schoolsPurchases.Count; i++)
         {
             commonFirms.IntersectWith(schoolsPurchases[i]);
         }
-
+        return commonFirms;
+    }
+    public static HashSet<string> LeastOneFirm(List<HashSet<string>> schoolsPurchases)
+    {
         HashSet<string> atLeastOneFirm = new HashSet<string>();
         for (int i = 0; i < schoolsPurchases.Count; i++)
         {
             atLeastOneFirm.UnionWith(schoolsPurchases[i]);
         }
-
-        HashSet<string> nobodyBoughtFirms = new HashSet<string>(allFirms);
-        nobodyBoughtFirms.ExceptWith(atLeastOneFirm);
-
-        PrintSet("Купили в каждом заведении: ", commonFirms);
-        PrintSet("Купили хотя бы в одном: ", atLeastOneFirm);
-        PrintSet("Никто не покупал: ", nobodyBoughtFirms);
+        return atLeastOneFirm;
     }
-    private static void PrintSet(string message, HashSet<string> set)
+    public static HashSet<string> NobodyBoughtFirms(List<HashSet<string>> schoolsPurchases,
+        HashSet<string> allFirms)
+    {
+        HashSet<string> nobodyBoughtFirms = new HashSet<string>(allFirms);
+        if (schoolsPurchases.Count == 0)
+        {
+            return nobodyBoughtFirms;
+        }
+        HashSet<string> atLeastOneFirm = new HashSet<string>();
+        atLeastOneFirm = LeastOneFirm(schoolsPurchases);
+        nobodyBoughtFirms.ExceptWith(atLeastOneFirm);
+        return nobodyBoughtFirms;
+    }
+    public static void PrintSet(string message, HashSet<string> set)
     {
         Console.WriteLine(message);
         if (set.Count == 0)
         {
-            Console.WriteLine("  [Список пуст]");
+            Console.WriteLine("Список пуст");
         }
         else
         {
@@ -114,12 +115,18 @@ internal class Collections
     }
     public static void PrintVoicedConsonants(string path)
     {
+        if (!File.Exists(path))
+        {
+            Console.WriteLine("Файл не найден!");
+            return;
+        }
         string voicedPattern = "бвгджзлмнр";
         HashSet<char> foundLetters = new HashSet<char>();
         StreamReader reader = new StreamReader(path);
         string? line;
         while ((line = reader.ReadLine()) != null)
         {
+            Console.WriteLine(line);
             string lowerLine = line.ToLower();
             for (int i = 0; i < lowerLine.Length; i++)
             {
@@ -153,6 +160,11 @@ internal class Collections
     }
     public static void GenerateLoginsFromFile(string filePath)
     {
+        if (!File.Exists(filePath))
+        {
+            Console.WriteLine("Файл не найден!");
+            return;
+        }
         Dictionary<string, int> surnameCounter = new Dictionary<string, int>();
         StreamReader reader = new StreamReader(filePath);
         string firstLine = reader.ReadLine();
@@ -161,10 +173,10 @@ internal class Collections
         for (int i = 0; i < n; i++)
         {
             string line = reader.ReadLine();
-            string[] parts = line.Split(new char[] { ' ' }, 
+            string[] parts = line.Split(new char[] { ' ' },
                 StringSplitOptions.RemoveEmptyEntries);
 
-            if (parts.Length >= 1)
+            if (parts.Length > 0)
             {
                 string surname = parts[0];
                 if (surnameCounter.ContainsKey(surname))
